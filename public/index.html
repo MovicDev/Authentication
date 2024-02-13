@@ -152,6 +152,10 @@ signInWithEmailAndPassword(auth, em, pa)
 }
 window.login = login
 
+
+
+
+
 const signC = () => {
   window.recaptchaVerifier = new RecaptchaVerifier(auth, 'sign-in-button', {
                 'size': 'invisible',
@@ -164,7 +168,7 @@ const signC = () => {
             signInWithPhoneNumber(auth, phoneNumber, appVerifier)
                 .then((confirmationResult) => {
                     console.log("msg sent");
-                    var verificationCode = prompt('Please enter the verification code sent to your mobile phone:');
+                    var verificationCode = prompt("Enter the verification code send to your phone")
                     return confirmationResult.confirm(verificationCode);
                 }).then((result)=>{
                     console.log("successfully authenticated", + result);
