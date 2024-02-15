@@ -17,10 +17,12 @@
         <div id="disp"></div>
         <input type="text" class="form-control my-3 shadow-none" id="todo" placeholder="Todo">
         <input type="text" class="form-control my-3 shadow-none" id="todoDes" placeholder="Todo Description">
-        <button class="btn btn-dark rounded-0 w-100" onclick="submitTodo()">Submit</button>
+        <input type="file" class="form-control my-3" id="fileF">
+        <button class="btn btn-dark rounded-0 w-100 my-3" type="button" onclick="submitTodo()">Submit</button>
+        <button class="btn btn-info rounded-0 w-100 my-3" type="button" onclick="submitFile()">SubmitFile</button>
         <table class="table table-bordered table-striped table-hover bg-danger mx-auto">
             <thead>
-                <tr class="bg-danger">
+            <tr>
                 <th class="col">S/n</th>
                 <th class="col">Todo</th>
                 <th class="col-7">Todo Description</th>
@@ -28,7 +30,7 @@
             </tr>
             </thead>
             <tbody id="showing">  
-                
+
             </tbody>
             
             </table>
@@ -37,7 +39,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
         import {getAuth, onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-        import {getDatabase, ref, set, onValue} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
+        import {getDatabase, ref, set, onValue, remove} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
+        import {getStorage, ref as stref, uploadBytesResumable} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-storage.js";
    
         const firebaseConfig = {
           apiKey: "AIzaSyAE4ldiM71qH0oB6dAXkwuMubwoQLP7uSY",
@@ -53,6 +56,7 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const database = getDatabase(app);
+        const storage = getStorage();
 
 
         onAuthStateChanged(auth, (user) => {
@@ -121,7 +125,7 @@
                data.map((eachTodo) => {
                 showing.innerHTML +=
                 `<tr>
-                        <td><input type ="checkbox"></td>
+                        <td><button onclick="deleteMsg(${eachTodo})">Delete</button></td>
                         <td> ${eachTodo.inputOne}</td>
                         <td> ${eachTodo.inputTwo}</td>
                         <td><small>${eachTodo.time}, ${eachTodo.date}</small></td>
@@ -131,41 +135,41 @@
              document.getElementById('todoDes').value ='';
           
             })
- 
+
+
+
+            const deleteMsg = (i) => {
+        let dRef = ref(database, `todos/${i}`)
+        let confirmation = confirm("Una sure say you wan delete am?")
+        if (confirmation==true) {
+            remove(dRef)
+            .then((res)=>{
+                console.log(res, "deleted succssfully");
+                alert('izz gone')
+                submitTodo()
+            })
+            .catch((err)=>{
+                console.log(err);
+            })
+        } else {
+            console.log("ko delete o");
+        }
+    }
+
+
+ const submitFile = () =>{
+     onAuthStateChanged(auth, (user)=>{
+         let fileUser = user.displayName
+         let subFile = document.getElementById('fileF').files[0]
+        let storageRef = stref(storage, `${fileUser}/${subFile.name}`)
+        let task = uploadBytesResumable(storageRef, subFile)
+        if(task){
+            console.log('saved');
+        }
+     })
+ }
+ window.submitFile = submitFile
 </script>    
 </body>
 </html>
 
-<!-- let newRef = ref(database, `todos`)
-        onValue(newRef, (snapshot)=>{
-            let data = snapshot.val()
-            data.map((todo,index) =>{
-                see.innerHTML += `
-                    <h5>${todo.inputOne}</h5>
-                    <h5>${todo.inputTwo}</h5>
-                    <small>${todo.time}, ${todo.date}</small>
-                `
-            })
-            }) -->
-
-
-
-            <!-- window.submitTodo = submitTodo
-
-            let newRef = ref(database, 'todos')
-            onValue(newRef, (snapshot)=>{
-                let data = snapshot.val()
-                console.log(data.length);
-                if (data){
-                    i = data.length
-                } else {
-                    i = 0
-                }
-               data.map((todo) => {
-                showing.innerHTML =`
-                    <div class="my-2 col btn shadow-sm"><span class="ms-5"> ${todo}.</span> <span class="ms-5"> ${todo.inputOne} </span> <span class="ms-5"> ${todo.inputTwo} </span> <span class="ms-5"> <small>${todo.time}, ${todo.date}</small></span> <button class="btn-close ms-5 bg-success shadow-none text-light"></button></div>
-                `
-               })
-          
-            })
-  -->
